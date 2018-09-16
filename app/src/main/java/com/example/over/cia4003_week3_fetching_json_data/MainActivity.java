@@ -6,9 +6,13 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,6 +44,37 @@ public class MainActivity extends ListActivity
         new GetContacts().execute("https://api.androidhive.info/contacts/");
     }
 
+    private void displayMessage(String msg)
+    {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    }
+
+    public void onSearch (View v)
+    {
+            //Read view
+            EditText etName = findViewById(R.id.etName);
+            EditText etEmail = findViewById(R.id.etEmail);
+
+            //Read views from listView
+            TextView tvName = findViewById(R.id.name);
+            TextView tvEmail = findViewById(R.id.email);
+
+            //Get inputs from view
+            String searchName = etName.getText().toString();
+            String searchEmail = etEmail.getText().toString();
+
+            //Get inputs from listView
+            String name = tvName.getText().toString();
+            String email = tvEmail.getText().toString();
+
+            if (searchName.contains(name) || searchEmail.contains(email))
+            {
+                Log.i("searchName", searchName);
+                Log.i("searchEmail", searchEmail);
+                Log.i("name", name);
+                Log.i("email", email);
+            }
+    }
 
     //Async task class to get json by making HTTP call
     private class GetContacts extends AsyncTask<String, Void, Boolean>
