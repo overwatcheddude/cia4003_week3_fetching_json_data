@@ -29,6 +29,10 @@ import java.util.HashMap;
 
 public class MainActivity extends ListActivity
 {
+    //Global variables
+    String searchName;
+    String searchEmail;
+
     // Hash map for ListView
     ArrayList<HashMap<String, String>> contactList;
 
@@ -40,6 +44,7 @@ public class MainActivity extends ListActivity
 
         //contact List to display in List view
         contactList = new ArrayList<>();
+
         // Call the async task to get json. Pass the url as an argument
         new GetContacts().execute("https://api.androidhive.info/contacts/");
     }
@@ -55,25 +60,12 @@ public class MainActivity extends ListActivity
             EditText etName = findViewById(R.id.etName);
             EditText etEmail = findViewById(R.id.etEmail);
 
-            //Read views from listView
-            TextView tvName = findViewById(R.id.name);
-            TextView tvEmail = findViewById(R.id.email);
-
             //Get inputs from view
-            String searchName = etName.getText().toString();
-            String searchEmail = etEmail.getText().toString();
+            searchName = etName.getText().toString();
+            searchEmail = etEmail.getText().toString();
 
-            //Get inputs from listView
-            String name = tvName.getText().toString();
-            String email = tvEmail.getText().toString();
-
-            if (searchName.contains(name) || searchEmail.contains(email))
-            {
-                Log.i("searchName", searchName);
-                Log.i("searchEmail", searchEmail);
-                Log.i("name", name);
-                Log.i("email", email);
-            }
+            //Calls GetContacts
+            new GetContacts().execute("https://api.androidhive.info/contacts/");
     }
 
     //Async task class to get json by making HTTP call
@@ -86,12 +78,13 @@ public class MainActivity extends ListActivity
         protected void onPreExecute()
         {
             super.onPreExecute();
+
             // Show the progress dialog
             pDialog = new ProgressDialog(MainActivity.this);
             pDialog.setMessage("Please wait...");
             pDialog.setCancelable(false);
             pDialog.show();
-        }// end on PreExecute
+        }
 
         // get the json from url, parse the JSON and add to HashMap to show the results in List View.
         @Override
@@ -118,13 +111,16 @@ public class MainActivity extends ListActivity
                     {
                         mBuffer.append(line);
                     }
-                    String jsonStr= mBuffer.toString();
+                    String jsonStr = mBuffer.toString();
 
                     // start parsing the json string
                     JSONObject jsonObj = new JSONObject(jsonStr);
 
                     // Getting JSON Array node
                     contactsArray = jsonObj.getJSONArray("contacts");
+
+                    //Clears the array list before query.
+                    contactList.clear();
 
                     // looping through the Contacts array
                     for (int i = 0; i < contactsArray.length(); i++)
@@ -146,21 +142,38 @@ public class MainActivity extends ListActivity
                         HashMap<String, String> contact = new HashMap<>();
 
                         // adding each child node to HashMap key => value
-                        contact.put("id", id);//key value pairs
-                        contact.put("name", name);
-                        contact.put("email", email);
-                        contact.put("mobile", mobile);
-                        contact.put("home", home);
-                        contact.put("office", office);
-
-                        // adding contact to contact list
-                        contactList.add(contact);
+                        if (searchName != null || searchEmail != null)
+                        {
+                            Log.i("SEARCH", "Search called.");
+                            if (name.contains(searchName))
+                            {
+                                contact.put("id", id);
+                                contact.put("name", name);
+                                contact.put("email", email);
+                                contact.put("mobile", mobile);
+                                contact.put("home", home);
+                                contact.put("office", office);
+                                contactList.add(contact);
+                            }
+                        }
+                        else
+                        {
+                            Log.i("NO SEARCH", "No search was called");
+                            contact.put("id", id);//key value pairs
+                            contact.put("name", name);
+                            contact.put("email", email);
+                            contact.put("mobile", mobile);
+                            contact.put("home", home);
+                            contact.put("office", office);
+                            // adding contact to contact list
+                            contactList.add(contact);
+                        }
                     } // end for
                     return true;
                 } // end if
                 else
                     {
-                    Log.d("JSON", "Failed to download file");
+                        Log.d("JSON", "Failed to download file");
                     }
             } // end try
             catch (IOException e)
@@ -183,9 +196,12 @@ public class MainActivity extends ListActivity
             if (pDialog.isShowing())
                 pDialog.dismiss();
 
+            Log.i("ArrayList", "contactList contains " + contactList.size() + " elements");
+
             // create a list adapter and assign it to list view. Update parsed JSON data into ListView
             ListAdapter adapter = new SimpleAdapter(MainActivity.this, contactList, R.layout.list_item,
                     new String[] { "name", "email", "mobile" }, new int[] { R.id.name, R.id.email, R.id.mobile });
+
             setListAdapter(adapter);// Bind  the contactList to the ListAdapter and display the data in the list view
         }
     }
