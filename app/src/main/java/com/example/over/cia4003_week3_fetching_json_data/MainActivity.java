@@ -144,16 +144,41 @@ public class MainActivity extends ListActivity
                         // adding each child node to HashMap key => value
                         if (searchName != null || searchEmail != null)
                         {
-                            Log.i("SEARCH", "Search called.");
-                            if (name.contains(searchName))
+                            Log.i("STRING", "searchName is " + searchName);
+                            Log.i("STRING", "searchEmail is " + searchEmail);
+
+                            if (searchName.equals("") && searchEmail.equals(""))
                             {
-                                contact.put("id", id);
+                                Log.i("NO SEARCH", "No search was called");
+                                contact.put("id", id);//key value pairs
                                 contact.put("name", name);
                                 contact.put("email", email);
                                 contact.put("mobile", mobile);
                                 contact.put("home", home);
                                 contact.put("office", office);
                                 contactList.add(contact);
+                            }
+                            else
+                            {
+                                //If one of the search inputs is empty, then they will be replace with a string to filter out results.
+                                if (searchName.equals(""))
+                                {
+                                    searchName = "123456ASDF";
+                                }
+                                if (searchEmail.equals(""))
+                                {
+                                    searchEmail = "123456ASDF";
+                                }
+                                if (name.contains(searchName) || email.contains(searchEmail))
+                                {
+                                    contact.put("id", id);
+                                    contact.put("name", name);
+                                    contact.put("email", email);
+                                    contact.put("mobile", mobile);
+                                    contact.put("home", home);
+                                    contact.put("office", office);
+                                    contactList.add(contact);
+                                }
                             }
                         }
                         else
@@ -165,7 +190,6 @@ public class MainActivity extends ListActivity
                             contact.put("mobile", mobile);
                             contact.put("home", home);
                             contact.put("office", office);
-                            // adding contact to contact list
                             contactList.add(contact);
                         }
                     } // end for
@@ -197,6 +221,10 @@ public class MainActivity extends ListActivity
                 pDialog.dismiss();
 
             Log.i("ArrayList", "contactList contains " + contactList.size() + " elements");
+            if (contactList.size() == 0)
+            {
+                displayMessage("No results were found.");
+            }
 
             // create a list adapter and assign it to list view. Update parsed JSON data into ListView
             ListAdapter adapter = new SimpleAdapter(MainActivity.this, contactList, R.layout.list_item,
