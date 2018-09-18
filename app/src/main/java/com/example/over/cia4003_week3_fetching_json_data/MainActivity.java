@@ -36,6 +36,9 @@ public class MainActivity extends ListActivity
     // Hash map for ListView
     ArrayList<HashMap<String, String>> contactList;
 
+    // hash map for single contact
+    HashMap<String, String> contact;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -66,6 +69,17 @@ public class MainActivity extends ListActivity
 
             //Calls GetContacts
             new GetContacts().execute("https://api.androidhive.info/contacts/");
+    }
+
+    private void addToHashMap(String id, String name, String email, String mobile, String home, String office)
+    {
+        contact.put("id", id);//key value pairs
+        contact.put("name", name);
+        contact.put("email", email);
+        contact.put("mobile", mobile);
+        contact.put("home", home);
+        contact.put("office", office);
+        contactList.add(contact);
     }
 
     //Async task class to get json by making HTTP call
@@ -138,8 +152,8 @@ public class MainActivity extends ListActivity
                         String home = phone.getString("home");
                         String office = phone.getString("office");
 
-                        // hash map for single contact
-                        HashMap<String, String> contact = new HashMap<>();
+                        //Assigns new hashmap on every loop to contact.
+                        contact = new HashMap<>();
 
                         // adding each child node to HashMap key => value
                         if (searchName != null || searchEmail != null)
@@ -150,47 +164,29 @@ public class MainActivity extends ListActivity
                             if (searchName.equals("") && searchEmail.equals(""))
                             {
                                 Log.i("NO SEARCH", "No search was called");
-                                contact.put("id", id);//key value pairs
-                                contact.put("name", name);
-                                contact.put("email", email);
-                                contact.put("mobile", mobile);
-                                contact.put("home", home);
-                                contact.put("office", office);
-                                contactList.add(contact);
+                                addToHashMap(id, name, email, mobile, home, office);
                             }
                             else
                             {
                                 //If one of the search inputs is empty, then they will be replace with a string to filter out results.
                                 if (searchName.equals(""))
                                 {
-                                    searchName = "123456ASDF";
+                                    searchName = "This is a placeholder text.";
                                 }
                                 if (searchEmail.equals(""))
                                 {
-                                    searchEmail = "123456ASDF";
+                                    searchEmail = "This is a placeholder text.";
                                 }
                                 if (name.contains(searchName) || email.contains(searchEmail))
                                 {
-                                    contact.put("id", id);
-                                    contact.put("name", name);
-                                    contact.put("email", email);
-                                    contact.put("mobile", mobile);
-                                    contact.put("home", home);
-                                    contact.put("office", office);
-                                    contactList.add(contact);
+                                    addToHashMap(id, name, email, mobile, home, office);
                                 }
                             }
                         }
                         else
                         {
                             Log.i("NO SEARCH", "No search was called");
-                            contact.put("id", id);//key value pairs
-                            contact.put("name", name);
-                            contact.put("email", email);
-                            contact.put("mobile", mobile);
-                            contact.put("home", home);
-                            contact.put("office", office);
-                            contactList.add(contact);
+                            addToHashMap(id, name, email, mobile, home, office);
                         }
                     } // end for
                     return true;
