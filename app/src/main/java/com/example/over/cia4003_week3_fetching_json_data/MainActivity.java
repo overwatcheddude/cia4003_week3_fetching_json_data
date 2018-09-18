@@ -59,16 +59,30 @@ public class MainActivity extends ListActivity
 
     public void onSearch (View v)
     {
-            //Read view
-            EditText etName = findViewById(R.id.etName);
-            EditText etEmail = findViewById(R.id.etEmail);
+        //Read view
+        EditText etName = findViewById(R.id.etName);
+        EditText etEmail = findViewById(R.id.etEmail);
 
-            //Get inputs from view
-            searchName = etName.getText().toString();
-            searchEmail = etEmail.getText().toString();
+        //Read input from view.
+        String name = etName.getText().toString();
 
-            //Calls GetContacts
-            new GetContacts().execute("https://api.androidhive.info/contacts/");
+        //If name field is empty, then assigns name to searchName.
+        //Done to prevent capitalizing an empty string.
+        if (name.equals(""))
+        {
+            searchName = name;
+        }
+        else
+        {
+            //The first letter is capitalized because the name JSON elements start with capital letters.
+            searchName = name.substring(0,1).toUpperCase() + name.substring(1);
+        }
+
+        //Email input is converted to lowercase because all the email JSON elements are in lowercase.
+        searchEmail = etEmail.getText().toString().toLowerCase();
+
+        //Calls GetContacts
+        new GetContacts().execute("https://api.androidhive.info/contacts/");
     }
 
     private void addToHashMap(String id, String name, String email, String mobile, String home, String office)
@@ -155,20 +169,22 @@ public class MainActivity extends ListActivity
                         //Assigns new hashmap on every loop to contact.
                         contact = new HashMap<>();
 
-                        // adding each child node to HashMap key => value
-                        if (searchName != null || searchEmail != null)
+                        //On initial intent load, both searchName and searchEmail will be null.
+                        if (searchName == null && searchEmail == null)
                         {
-                            Log.i("STRING", "searchName is " + searchName);
-                            Log.i("STRING", "searchEmail is " + searchEmail);
-
+                            Log.i("NULL", "searchName and searchEmail are null.");
+                            addToHashMap(id, name, email, mobile, home, office);
+                        }
+                        else
+                        {
                             if (searchName.equals("") && searchEmail.equals(""))
                             {
-                                Log.i("NO SEARCH", "No search was called");
+                                Log.i("SEARCH", "No search input was entered.");
                                 addToHashMap(id, name, email, mobile, home, office);
                             }
                             else
                             {
-                                //If one of the search inputs is empty, then they will be replace with a string to filter out results.
+                                //An empty string "" displays all results, so a placeholder is inserted instead.
                                 if (searchName.equals(""))
                                 {
                                     searchName = "This is a placeholder text.";
@@ -177,16 +193,12 @@ public class MainActivity extends ListActivity
                                 {
                                     searchEmail = "This is a placeholder text.";
                                 }
+                                //Check if name or email matches the entered name or email.
                                 if (name.contains(searchName) || email.contains(searchEmail))
                                 {
                                     addToHashMap(id, name, email, mobile, home, office);
                                 }
                             }
-                        }
-                        else
-                        {
-                            Log.i("NO SEARCH", "No search was called");
-                            addToHashMap(id, name, email, mobile, home, office);
                         }
                     } // end for
                     return true;
